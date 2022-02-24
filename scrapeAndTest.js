@@ -24,6 +24,7 @@ var { open } = require("sqlite");
   const domains = await db.all("SELECT id, url FROM urls");
   for (let i = 0; i < domains.length; i++) {
     const domain = domains[i];
+    console.log(`scraping ${domain.url} which is ${i + 1} of ${domains.length}`)
     const results = await testWithPa11y(domain.url);
     // insert results
     await db.run("INSERT INTO results (domain, results) VALUES (?, ?)", [
