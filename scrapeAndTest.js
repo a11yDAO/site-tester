@@ -1,9 +1,13 @@
-var { testWithPa11y } = require("./utils.js");
-var sqlite3 = require("sqlite3");
-var { open } = require("sqlite");
+import { testWithPa11y } from "./utils.js";
+import sqlite3 from "sqlite3";
+import { open } from "sqlite";
+import pLimit from 'p-limit'
 
 // this is a top-level await
 (async () => {
+  const MAX_CONCURRENT = 25
+  const limit = pLimit(MAX_CONCURRENT)
+
   sqlite3.verbose();
   // open the database
   const db = await open({
@@ -20,16 +24,31 @@ var { open } = require("sqlite");
       );
     `);
 
+  let running = 0
+
   // loop over the urls table and test each with pa11y
   const domains = await db.all("SELECT id, url FROM urls");
-  for (let i = 0; i < domains.length; i++) {
-    const domain = domains[i];
-    console.log(`scraping ${domain.url} which is ${i + 1} of ${domains.length}`)
-    const results = await testWithPa11y(domain.url);
-    // insert results
-    await db.run("INSERT INTO results (domain, results) VALUES (?, ?)", [
-      domain.url,
-      JSON.stringify(results),
-    ]);
-  }
+
+  let promises = domains.map(domain => {
+    // wrap the function we are calling in the limit function we defined above
+    return limit(() => testWithPa11y({url: domain.url, db}));
+  });
+
+  await Promise.all(promises);
+
+  // for (let i = 0; i < domains.length; i++) {
+  //   const domain = domains[i];
+  //   console.log(`scraping ${domain.url} which is ${i + 1} of ${domains.length}`)
+  //   running++
+  //   await new Promise(async (resolve) => {
+  //     running++
+  //     if(running > MAX_CONCURRENT){
+  //       await testWithPa11y({url: domain.url, db});
+  //       running--
+  //     } else {
+  //       testWithPa11y({url: domain.url, db});
+  //     }
+  //     resolve();
+  //   });
+  // }
 })();
