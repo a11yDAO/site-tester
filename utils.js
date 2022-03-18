@@ -1,6 +1,5 @@
 import pa11y from "pa11y";
 
-<<<<<<< HEAD
 export async function testWithPa11y({url, db}) {
   console.log(`Scraping ${url}`)
 	let results
