@@ -1,12 +1,13 @@
 import pa11y from "pa11y";
 
+<<<<<<< HEAD
 export async function testWithPa11y({url, db}) {
   console.log(`Scraping ${url}`)
 	let results
   try {
-    results = await pa11y(url);
-  }catch(e){
-    console.log('pa11y error.  swallowing', e)
+    const results = await pa11y(url);
+  } catch (e) {
+    console.log("pa11y error.  swallowing", e);
   }
 	if (!results){
 		return
@@ -18,7 +19,3 @@ export async function testWithPa11y({url, db}) {
   ]);
 	console.log(`committed ${url}`);
 }
-
-
-
-

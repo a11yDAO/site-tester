@@ -1,12 +1,12 @@
 import { testWithPa11y } from "./utils.js";
 import sqlite3 from "sqlite3";
 import { open } from "sqlite";
-import pLimit from 'p-limit'
+import pLimit from "p-limit";
 
 // this is a top-level await
 (async () => {
-  const MAX_CONCURRENT = 25
-  const limit = pLimit(MAX_CONCURRENT)
+  const MAX_CONCURRENT = 25;
+  const limit = pLimit(MAX_CONCURRENT);
 
   sqlite3.verbose();
   // open the database
@@ -24,14 +24,14 @@ import pLimit from 'p-limit'
       );
     `);
 
-  let running = 0
+  let running = 0;
 
   // loop over the urls table and test each with pa11y
   const domains = await db.all("SELECT id, url FROM urls");
 
-  let promises = domains.map(domain => {
+  let promises = domains.map((domain) => {
     // wrap the function we are calling in the limit function we defined above
-    return limit(() => testWithPa11y({url: domain.url, db}));
+    return limit(() => testWithPa11y({ url: domain.url, db }));
   });
 
   await Promise.all(promises);
